@@ -1,65 +1,181 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useState } from "react";
+import Container from "@/components/ui/container";
+import Toast from "@/components/ui/toast";
+import TaskHeader from "@/components/tasks/task-header";
+import TaskForm from "@/components/tasks/task-form";
+import TaskList from "@/components/tasks/task-list";
+import { initialTasks } from "@/data/tasks";
+import type { Task, TaskStatus } from "@/types/task";
+
+type TaskFilter = "ALL" | "TODO" | "IN_PROGRESS" | "DONE";
+
+const STORAGE_KEY = "task-management-system-tasks";
+
+function getInitialTasks() {
+  if (typeof window === "undefined") return initialTasks;
+
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (!saved) return initialTasks;
+
+  try {
+    return JSON.parse(saved) as Task[];
+  } catch {
+    return initialTasks;
+  }
+}
 
 export default function Home() {
+  const [tasks, setTasks] = useState<Task[]>(getInitialTasks);
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<TaskFilter>("ALL");
+  const [mounted, setMounted] = useState(false);
+  const [toast, setToast] = useState("");
+  const [toastPhase, setToastPhase] = useState<"loading" | "success" | "">("");
+  const [toastType, setToastType] = useState<"success" | "danger">("success");
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  function showToast(message: string, type: "success" | "danger" = "success") {
+    setToastType(type);
+    setToast("Please wait...");
+    setToastPhase("loading");
+
+    setTimeout(() => {
+      setToast(message);
+      setToastPhase("success");
+    }, 350);
+
+    setTimeout(() => {
+      setToastPhase("");
+    }, 800);
+  }
+  function saveTasks(nextTasks: Task[]) {
+    setTasks(nextTasks);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(nextTasks));
+  }
+
+  function addTask(title: string, description: string) {
+    const newTask: Task = {
+      id: Date.now(),
+      title,
+      description,
+      status: "TODO",
+      createdAt: new Date().toISOString(),
+    };
+
+    saveTasks([newTask, ...tasks]);
+    showToast("Task added successfully.");
+  }
+
+  function deleteTask(id: number) {
+    saveTasks(tasks.filter((task) => task.id !== id));
+    showToast("Task deleted.", "danger");
+  }
+
+  function editTask(id: number, title: string, description: string) {
+    saveTasks(
+      tasks.map((task) =>
+        task.id === id ? { ...task, title, description } : task,
+      ),
+    );
+
+    showToast("Task updated.");
+  }
+
+  function changeStatus(id: number) {
+    saveTasks(
+      tasks.map((task) => {
+        if (task.id !== id) return task;
+
+        const nextStatus =
+          task.status === "TODO"
+            ? "IN_PROGRESS"
+            : task.status === "IN_PROGRESS"
+              ? "DONE"
+              : "TODO";
+
+        return { ...task, status: nextStatus };
+      }),
+    );
+
+    setFilter("ALL");
+    showToast("Status changed.");
+  }
+
+  function moveTask(id: number, status: TaskStatus) {
+    saveTasks(
+      tasks.map((task) => (task.id === id ? { ...task, status } : task)),
+    );
+
+    setFilter("ALL");
+    showToast("Task moved successfully.");
+  }
+
+  function clearTasks() {
+    saveTasks([]);
+    showToast("All tasks cleared.", "danger");
+  }
+
+  const filteredTasks = tasks
+    .filter((task) => task.title.toLowerCase().includes(search.toLowerCase()))
+    .filter((task) => (filter === "ALL" ? true : task.status === filter));
+
+  if (!mounted) return null;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+    <main className="min-h-screen bg-[var(--background)] text-[var(--text-main)]">
+      <TaskHeader
+        search={search}
+        setSearch={setSearch}
+        filter={filter}
+        setFilter={setFilter}
+      />
+
+      <section className="py-10 md:py-14">
+        <Container>
+          <div className="space-y-8">
+            <div className="tasks-overview-header">
+              <div className="tasks-overview-layout">
+                <div className="tasks-overview-copy">
+                  <h2 className="text-2xl font-semibold">Tasks Overview</h2>
+
+                  <p className="tasks-overview-subtitle">
+                    Drag tasks between columns to update their status.
+                  </p>
+                </div>
+
+                <div className="tasks-overview-actions">
+                  <TaskForm onAdd={addTask} />
+
+                  {tasks.length > 0 ? (
+                    <button
+                      type="button"
+                      onClick={clearTasks}
+                      className="clear-all-trigger"
+                    >
+                      Clear All
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+
+            <TaskList
+              tasks={filteredTasks}
+              onDelete={deleteTask}
+              onStatus={changeStatus}
+              onEdit={editTask}
+              onMove={moveTask}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+          </div>
+        </Container>
+      </section>
+
+      <Toast message={toast} phase={toastPhase} type={toastType} />
+    </main>
   );
 }
