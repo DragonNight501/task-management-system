@@ -5,7 +5,13 @@ A modern, animated task management system built with Next.js 16, React 19, and T
 Designed with a strong focus on UI/UX, smooth animations, and real-world interaction patterns.
 
 ---
+## 🌐 Live Demo
 
+<p align="center">
+  <a href="https://mohamad-dabbah-task.vercel.app" target="_blank">
+    <img src="https://img.shields.io/badge/Live%20Demo-View%20Project-7c3aed?style=for-the-badge&logo=vercel&logoColor=white" />
+  </a>
+</p>
 ## ✨ Features
 
 - 🧠 Smart task management (Create, Edit, Delete)
