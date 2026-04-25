@@ -53,8 +53,6 @@ bash npm run build npm start
 
 ## 📸 Preview
 
-## 📸 Preview
-
 <p align="center">
   <img src="./public/preview.png" width="900" />
 </p>
