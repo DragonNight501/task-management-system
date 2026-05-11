@@ -34,7 +34,7 @@ export default function TaskHeader({
             Productivity System
           </p>
 
-          <h1 className="text-4x1 neon-title">Task Management System</h1>
+          <h1 className="text-4xl neon-title">Task Management System</h1>
         </div>
 
         <div className="header-toolbar">
