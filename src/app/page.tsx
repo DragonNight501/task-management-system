@@ -12,6 +12,8 @@ import type { Task, TaskStatus } from "@/types/task";
 type TaskFilter = "ALL" | "TODO" | "IN_PROGRESS" | "DONE";
 
 const STORAGE_KEY = "task-management-system-tasks";
+const TOAST_DELAY = 350;
+const TOAST_DURATION = 800;
 
 function getInitialTasks() {
   if (typeof window === "undefined") return initialTasks;
@@ -47,11 +49,11 @@ export default function Home() {
     setTimeout(() => {
       setToast(message);
       setToastPhase("success");
-    }, 350);
+    }, TOAST_DELAY);
 
     setTimeout(() => {
       setToastPhase("");
-    }, 800);
+    }, TOAST_DURATION);
   }
   function saveTasks(nextTasks: Task[]) {
     setTasks(nextTasks);
