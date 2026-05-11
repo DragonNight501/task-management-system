@@ -16,12 +16,13 @@ export default function TaskCard({ task, onDelete, onEdit }: Props) {
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description);
 
-  const statusClass =
-    task.status === "TODO"
-      ? "status-todo"
-      : task.status === "IN_PROGRESS"
-        ? "status-progress"
-        : "status-done";
+  const statusClasses = {
+    TODO: "status-todo",
+    IN_PROGRESS: "status-progress",
+    DONE: "status-done",
+  };
+
+  const statusClass = statusClasses[task.status];
 
   function closeEdit(resetValues: boolean) {
     setIsClosing(true);
