@@ -541,12 +541,6 @@ button {
     transition: all 0.3s ease;
 }
 
-.task-card-custom:not(.task-card-editing):hover {
-    transform: translateY(-4px);
-    border-color: rgba(255, 255, 255, 0.18);
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
-}
-
 .task-status-glow {
     position: absolute;
     top: 18px;
