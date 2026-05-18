@@ -24,6 +24,15 @@ export const metadata: Metadata = {
     "Kanban Board",
   ],
   authors: [{ name: "Mohamad Hadi Dabbah Aljimal" }],
+  metadataBase: new URL("https://mohamad-dabbah-task.vercel.app"),
+  openGraph: {
+    title: "Task Management System",
+    description:
+      "Modern animated task management system built with Next.js and TypeScript.",
+    url: "https://mohamad-dabbah-task.vercel.app",
+    siteName: "Task Management System",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
